@@ -12,6 +12,6 @@ Upload all files in this directory to the root of a GitHub repository. In Settin
 
 No build step or backend is required. Keep `xlsx.full.min.js` next to `index.html`, or Excel parsing will not work. Do not upload business spreadsheets to GitHub; import them locally after opening the page.
 
-Imported spreadsheet data is not uploaded or persisted. Reloading the page clears it. Counts refresh every minute, and the Refresh counts button is available for an immediate update.
+Imported spreadsheet data and filter preferences are saved locally in this browser using IndexedDB; they are not uploaded. Reopen the page to restore the last workbook and filters, or use Clear saved data to remove them. If browser storage is unavailable, the page continues without persistence. Counts refresh every minute, and the Refresh counts button is available for an immediate update.
 
-Excel parsing and export use SheetJS CE 0.20.3 under the Apache 2.0 license. See `SHEETJS-LICENSE` and the [standalone browser documentation](https://docs.sheetjs.com/docs/getting-started/installation/standalone/).
+Excel parsing and export use SheetJS CE 0.20.3 under the Apache 2.0 license. See `vendor/LICENSE` and the [standalone browser documentation](https://docs.sheetjs.com/docs/getting-started/installation/standalone/).
