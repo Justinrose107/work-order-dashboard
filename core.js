@@ -16,20 +16,20 @@
     let s=text(sub).toUpperCase();if(s==='KOREA')s='KOR';if(s==='RCIS')s='CIS';
     let b=Object.keys(REGIONS).find(k=>REGIONS[k].includes(s));
     const given=text(big).toUpperCase();
-    return {region:b||(REGIONS[given]?given:'未匹配'),sub:s||'未填写',regionIssue:!b||(given&&given!==b)};
+    return {region:b||(REGIONS[given]?given:'Unmatched'),sub:s||'Not provided',regionIssue:!b||(given&&given!==b)};
   }
   const fields={id:['Work Order Number（Required）','Work Order Number','工单编号'],region:['Service Sales Region','大区'],sub:['Service Region','子区域'],status:['Work Order Status','工单状态'],complete:['Service Complete Time','服务完成时间'],country:['Country','国家'],owner:['Owner（Required）','Owner','负责人'],type:['Work Order Type','工单类型'],priority:['Priority','优先级'],flow:['Work Order Flow Status','流程状态'],progress:['Work Order Flow Progress'],account:['Account Name','客户'],model:['Product Model（txt）','Product Model','产品型号'],serial:['Serial No.','序列号'],case:['Case Number'],created:['Created On'],fault:['Fault Description'],solution:['Field Solution']};
   function columns(headers){return Object.fromEntries(Object.entries(fields).map(([k,aliases])=>[k,headers.findIndex(h=>aliases.some(a=>norm(h)===norm(a)))]));}
   function parse(matrix,options={}){
     const hi=matrix.slice(0,30).findIndex(r=>{const c=columns(r);return c.id>=0&&c.status>=0&&c.complete>=0});
-    if(hi<0)throw Error('找不到必需列：Work Order Number、Work Order Status、Service Complete Time。请导入原始工单导出表。');
-    const headers=matrix[hi],c=columns(headers);if(c.sub<0&&c.region<0)throw Error('缺少区域列：Service Region 或 Service Sales Region。');
+    if(hi<0)throw Error('Missing required columns: Work Order Number, Work Order Status, Service Complete Time. Please import the original work order export.');
+    const headers=matrix[hi],c=columns(headers);if(c.sub<0&&c.region<0)throw Error('Missing region columns: Service Region or Service Sales Region.');
     const rows=[],seen=new Set();let duplicate=0,blankId=0;
     for(let i=hi+1;i<matrix.length;i++){
       const raw=matrix[i];if(raw.every(v=>text(v)===''))continue;
       const r=Object.fromEntries(Object.keys(fields).map(k=>[k,c[k]>=0?text(raw[c[k]]):'']));
       if(!r.id)blankId++;if(r.id&&seen.has(r.id))duplicate++;seen.add(r.id);
-      Object.assign(r,region(r.region,r.sub));r.row=i+1;r.raw=raw;r.completeMs=date(c.complete>=0?raw[c.complete]:null,options.offset??8,options.date1904);r.closed=closed(r.status);rows.push(r);
+      Object.assign(r,region(r.region,r.sub));r.row=i+1;r.raw=raw;r.completeMs=date(c.complete>=0?raw[c.complete]:null,options.offset??8,options.date1904);if(c.created>=0&&typeof raw[c.created]==='number'){const t=date(raw[c.created],0,options.date1904);r.created=Number.isFinite(t)?new Date(t).toISOString().slice(0,19).replace('T',' '):text(raw[c.created]);}r.closed=closed(r.status);rows.push(r);
     }
     return {rows,headers,duplicate,blankId};
   }
